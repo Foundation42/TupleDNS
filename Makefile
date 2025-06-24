@@ -77,9 +77,19 @@ python: shared
 
 # WebAssembly build
 wasm:
-	emcc -O2 -s WASM=1 -s EXPORTED_FUNCTIONS='["_tupledns_init","_tupledns_register","_tupledns_find","_tupledns_free_result","_tupledns_cleanup"]' \
+	emcc -O2 -s WASM=1 -s EXPORTED_FUNCTIONS='["_tupledns_init","_tupledns_register","_tupledns_find","_tupledns_free_result","_tupledns_cleanup","_tupledns_validate_coordinate","_tupledns_encode_coordinate","_tupledns_decode_coordinate"]' \
 		-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' \
-		$(SOURCES) -o tupledns.js
+		-s ALLOW_MEMORY_GROWTH=1 \
+		-s MODULARIZE=1 \
+		-s EXPORT_NAME="TupleDNSWasm" \
+		$(SOURCES) -o tupledns-wasm.js
+
+# Node.js server
+server:
+	node proxy-server.js
+
+# Demo server with proxy
+demo: server
 
 # Install targets
 PREFIX ?= /usr/local
