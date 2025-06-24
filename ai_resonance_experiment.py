@@ -19,8 +19,21 @@ import anthropic
 import google.generativeai as genai
 import tupledns
 
-# Load environment variables
-openai.api_key = os.getenv('OPENAI_API_KEY')
+# Load environment variables from .env file
+def load_env():
+    env_path = os.path.expanduser('~/.env')
+    if os.path.exists(env_path):
+        with open(env_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ[key] = value
+
+load_env()
+
+# Initialize API clients
+openai_client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 anthropic_client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
@@ -211,7 +224,7 @@ Keep it to 2-3 sentences and make it compelling!"""
         try:
             # Use the first agent's provider for generation
             if agent1.provider == "openai":
-                response = openai.chat.completions.create(
+                response = openai_client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=150,
