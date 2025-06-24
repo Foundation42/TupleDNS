@@ -1,8 +1,8 @@
 # TupleDNS v1.0
 ## Multidimensional Discovery Protocol Using DNS Infrastructure
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/example/tupledns)
-[![Tests](https://img.shields.io/badge/tests-10%2F10%20passing-brightgreen)](https://github.com/example/tupledns)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/Foundation42/TupleDNS)
+[![Tests](https://img.shields.io/badge/tests-10%2F10%20passing-brightgreen)](https://github.com/Foundation42/TupleDNS)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![WebAssembly](https://img.shields.io/badge/WebAssembly-ready-blue)](https://webassembly.org/)
 
@@ -519,8 +519,8 @@ if verify_node_capability(node, "secure-channel"):
 sudo apt-get install build-essential
 
 # Clone and build
-git clone https://github.com/example/tupledns.git
-cd tupledns
+git clone https://github.com/Foundation42/TupleDNS.git
+cd TupleDNS
 make all
 make test
 
@@ -631,10 +631,10 @@ tupledns/
 ## 🤝 Community
 
 ### Support Channels
-- **GitHub Issues**: Bug reports and feature requests
-- **Discussions**: Community Q&A and ideas
-- **Discord**: Real-time chat (coming soon)
-- **Email**: hello@tupledns.org
+- **GitHub Issues**: [Bug reports and feature requests](https://github.com/Foundation42/TupleDNS/issues)
+- **Discussions**: [Community Q&A and ideas](https://github.com/Foundation42/TupleDNS/discussions)
+- **GitHub Repository**: [https://github.com/Foundation42/TupleDNS](https://github.com/Foundation42/TupleDNS)
+- **Foundation42**: [https://github.com/Foundation42](https://github.com/Foundation42)
 
 ### Ecosystem Projects
 - **TupleDNS Music Network**: Creative collaboration platform

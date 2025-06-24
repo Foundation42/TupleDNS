@@ -4,6 +4,9 @@
 
 Welcome to the TupleDNS project! This guide will get you up to speed on this revolutionary multidimensional discovery protocol.
 
+**📍 Repository**: https://github.com/Foundation42/TupleDNS  
+**🏢 Organization**: https://github.com/Foundation42
+
 ---
 
 ## 🌟 What Is TupleDNS?
