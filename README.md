@@ -547,24 +547,26 @@ make benchmark
 
 ```
 tupledns/
-├── src/
-│   ├── tupledns.h           # Main header
-│   ├── tupledns.c           # Core implementation
-│   └── tupledns.py          # Python bindings
-├── bindings/
-│   ├── tupledns.js          # JavaScript/WebAssembly
-│   └── proxy-server.cjs     # HTTP proxy
+├── tupledns.h               # Main C header
+├── tupledns.c               # Core C implementation  
+├── tupledns.py              # Python bindings
+├── tupledns.js              # JavaScript/WebAssembly bindings
+├── proxy-server.cjs         # HTTP proxy server
 ├── examples/
 │   ├── example_basic.c      # Basic API usage
 │   ├── example_spatial.c    # IoT spatial discovery
 │   ├── example_music.c      # Music collaboration
 │   └── demo.html           # Browser demo
-├── tests/
-│   ├── test_tupledns.c      # C test suite
-│   └── test-browser.cjs     # JavaScript tests
-└── docs/
-    ├── RFC-TupleDNS.md      # IETF RFC draft
-    └── CLAUDE.md           # Development guide
+├── test_tupledns.c          # C test suite
+├── test-browser.cjs         # JavaScript tests
+├── ai_resonance_experiment.py # AI agent discovery demo
+├── docs/
+│   ├── Getting-Started.md   # Quick start guide
+│   ├── C-API.md            # C library reference
+│   └── Protocol-Spec.md    # Technical protocol details
+├── RFC-TupleDNS.md          # IETF RFC draft
+├── CLAUDE.md               # Development guide
+└── Makefile                # Build system
 ```
 
 ### Contributing
@@ -613,18 +615,17 @@ tupledns/
 - **[C API Documentation](docs/C-API.md)** - Complete C library reference
 - **[Python API Documentation](docs/Python-API.md)** - Python bindings guide
 - **[JavaScript API Documentation](docs/JavaScript-API.md)** - Browser/Node.js reference
-- **[REST API Documentation](docs/REST-API.md)** - HTTP proxy endpoints
+- **[REST API Documentation](proxy-server.cjs)** - HTTP proxy server implementation
 
 ### Guides
 - **[Getting Started Guide](docs/Getting-Started.md)** - Step-by-step tutorial
-- **[Coordinate Design Guide](docs/Coordinate-Design.md)** - Best practices for coordinate systems
-- **[Integration Guide](docs/Integration-Guide.md)** - Integrating TupleDNS into applications
-- **[Deployment Guide](docs/Deployment-Guide.md)** - Production deployment considerations
+- **[AI Resonance Experiment](ai_resonance_experiment.py)** - AI agent discovery demonstration
+- **[CLAUDE Development Guide](CLAUDE.md)** - Guide for Claude instances working on TupleDNS
+- **[Original Specification](Spec.md)** - Initial project specification and requirements
 
 ### Specifications
 - **[TupleDNS Protocol Specification](docs/Protocol-Spec.md)** - Technical protocol details
-- **[DNS Integration Specification](docs/DNS-Integration.md)** - DNS record formats and usage
-- **[IETF RFC Draft](docs/RFC-TupleDNS.md)** - Standards submission
+- **[IETF RFC Draft](RFC-TupleDNS.md)** - Complete standards submission
 
 ---
 

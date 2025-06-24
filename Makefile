@@ -18,12 +18,12 @@ OBJECTS = $(SOURCES:.c=.o)
 HEADERS = tupledns.h
 
 # Test files
-TEST_SOURCES = test_tupledns.c
+TEST_SOURCES = tests/test_tupledns.c
 TEST_OBJECTS = $(TEST_SOURCES:.c=.o)
-TEST_EXECUTABLE = test_tupledns
+TEST_EXECUTABLE = tests/test_tupledns
 
 # Examples
-EXAMPLE_SOURCES = example_basic.c example_spatial.c example_music.c
+EXAMPLE_SOURCES = examples/example_basic.c examples/example_spatial.c examples/example_music.c
 EXAMPLE_OBJECTS = $(EXAMPLE_SOURCES:.c=.o)
 EXAMPLE_EXECUTABLES = $(EXAMPLE_SOURCES:.c=)
 
@@ -57,12 +57,17 @@ endif
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-# Test executable
-test: $(TEST_EXECUTABLE)
+# Test executables
+test: $(TEST_EXECUTABLE) test-comprehensive
 
 $(TEST_EXECUTABLE): $(TEST_OBJECTS) $(STATIC_LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< -L. -l$(LIB_NAME)
 	@echo "Built test executable: $@"
+
+# Comprehensive test suite
+test-comprehensive: tests/c/test_comprehensive.c $(STATIC_LIB)
+	$(CC) $(CFLAGS) $(INCLUDES) -o tests/c/test_comprehensive $< -L. -l$(LIB_NAME)
+	@echo "Built comprehensive test suite"
 
 # Examples
 examples: $(EXAMPLE_EXECUTABLES)
@@ -114,11 +119,33 @@ uninstall:
 	rm -f $(INCLUDEDIR)/tupledns.h
 	@echo "Uninstalled TupleDNS from $(PREFIX)"
 
+# Test runners
+test-all: test test-python test-javascript test-integration
+	@echo "All tests completed"
+
+test-python: $(STATIC_LIB)
+	@echo "Running Python tests..."
+	cd tests/python && python -m pytest test_tupledns.py -v
+
+test-javascript: $(STATIC_LIB)
+	@echo "Running JavaScript tests..."
+	cd tests/javascript && node test_tupledns.js
+
+test-integration: $(STATIC_LIB)
+	@echo "Running integration tests..."
+	python tests/integration/test_cross_language.py
+
+test-memory: test-comprehensive
+	@echo "Running memory leak detection..."
+	valgrind --leak-check=full --error-exitcode=1 ./test_tupledns
+	valgrind --leak-check=full --error-exitcode=1 ./tests/c/test_comprehensive
+
 # Cleaning
 clean:
 	rm -f $(OBJECTS) $(TEST_OBJECTS) $(EXAMPLE_OBJECTS)
 	rm -f $(STATIC_LIB) $(SHARED_LIB) $(DYLIB)
 	rm -f $(TEST_EXECUTABLE) $(EXAMPLE_EXECUTABLES)
+	rm -f tests/c/test_comprehensive
 	rm -f tupledns.js tupledns.wasm
 	rm -rf build/
 	find . -name "*.pyc" -delete
@@ -142,7 +169,7 @@ PACKAGE = tupledns-$(VERSION)
 
 package: clean
 	mkdir -p $(PACKAGE)
-	cp -r *.c *.h *.py Makefile README.md LICENSE examples/ $(PACKAGE)/
+	cp -r *.c *.h *.py *.js *.cjs *.html Makefile README.md LICENSE examples/ docs/ $(PACKAGE)/
 	tar -czf $(PACKAGE).tar.gz $(PACKAGE)
 	rm -rf $(PACKAGE)
 	@echo "Created package: $(PACKAGE).tar.gz"
@@ -151,20 +178,29 @@ package: clean
 help:
 	@echo "TupleDNS Build System"
 	@echo ""
-	@echo "Targets:"
-	@echo "  all        - Build static and shared libraries"
-	@echo "  shared     - Build shared library"
-	@echo "  test       - Build test executable"
-	@echo "  examples   - Build example programs"
-	@echo "  python     - Build Python extension"
-	@echo "  wasm       - Build WebAssembly version"
-	@echo "  install    - Install library and headers"
-	@echo "  uninstall  - Remove installed files"
-	@echo "  clean      - Remove build artifacts"
-	@echo "  format     - Format source code"
-	@echo "  lint       - Run static analysis"
-	@echo "  docs       - Generate documentation"
-	@echo "  package    - Create distribution package"
-	@echo "  help       - Show this help"
+	@echo "Build Targets:"
+	@echo "  all            - Build static and shared libraries"
+	@echo "  shared         - Build shared library"
+	@echo "  examples       - Build example programs"
+	@echo "  python         - Build Python extension"
+	@echo "  wasm           - Build WebAssembly version"
+	@echo ""
+	@echo "Test Targets:"
+	@echo "  test           - Build and run basic tests"
+	@echo "  test-all       - Run all test suites (C, Python, JS, Integration)"
+	@echo "  test-python    - Run Python test suite"
+	@echo "  test-javascript - Run JavaScript test suite"
+	@echo "  test-integration - Run cross-language integration tests"
+	@echo "  test-memory    - Run memory leak detection with valgrind"
+	@echo ""
+	@echo "Maintenance Targets:"
+	@echo "  install        - Install library and headers"
+	@echo "  uninstall      - Remove installed files"
+	@echo "  clean          - Remove build artifacts"
+	@echo "  format         - Format source code"
+	@echo "  lint           - Run static analysis"
+	@echo "  docs           - Generate documentation"
+	@echo "  package        - Create distribution package"
+	@echo "  help           - Show this help"
 
-.PHONY: all shared test examples python wasm install uninstall clean format lint docs package help
+.PHONY: all shared test test-all test-python test-javascript test-integration test-memory test-comprehensive examples python wasm install uninstall clean format lint docs package help

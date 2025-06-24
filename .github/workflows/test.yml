@@ -1,0 +1,357 @@
+name: TupleDNS Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test-c:
+    name: C Library Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make
+    
+    - name: Build C library
+      run: |
+        make clean
+        make all
+    
+    - name: Run original C tests
+      run: |
+        make test
+        ./test_tupledns
+    
+    - name: Build comprehensive C tests
+      run: |
+        gcc -std=c99 -Wall -Wextra -O2 -I. -o tests/c/test_comprehensive tests/c/test_comprehensive.c -L. -ltupledns
+    
+    - name: Run comprehensive C tests
+      run: |
+        ./tests/c/test_comprehensive
+    
+    - name: Run performance tests
+      run: |
+        ./tests/c/test_comprehensive --performance
+    
+    - name: Build examples
+      run: |
+        make examples
+    
+    - name: Test examples can run
+      run: |
+        LD_LIBRARY_PATH=. ./examples/example_basic
+        LD_LIBRARY_PATH=. ./examples/example_spatial
+        LD_LIBRARY_PATH=. ./examples/example_music
+
+  test-python:
+    name: Python Bindings Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, '3.10', 3.11, 3.12]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov
+    
+    - name: Build C library
+      run: |
+        make clean
+        make all
+    
+    - name: Test Python bindings
+      run: |
+        export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+        python -c "import tupledns; print('Python bindings import successfully')"
+    
+    - name: Run Python test suite
+      run: |
+        export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+        cd tests/python
+        pytest test_tupledns.py -v --tb=short
+    
+    - name: Run Python performance tests
+      run: |
+        export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+        cd tests/python
+        pytest test_tupledns.py -v -m performance
+
+  test-javascript:
+    name: JavaScript/Node.js Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18, 20]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make
+    
+    - name: Build C library (for proxy server)
+      run: |
+        make clean
+        make all
+    
+    - name: Test JavaScript bindings structure
+      run: |
+        node -e "const TupleDNS = require('./tupledns.js'); console.log('JavaScript bindings loaded successfully');"
+    
+    - name: Run JavaScript test suite
+      run: |
+        cd tests/javascript
+        node test_tupledns.js
+    
+    - name: Run browser integration tests
+      run: |
+        node tests/test-browser.cjs
+
+  test-integration:
+    name: Cross-Language Integration Tests
+    runs-on: ubuntu-latest
+    needs: [test-c, test-python, test-javascript]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make
+        python -m pip install --upgrade pip
+        pip install pytest
+    
+    - name: Build all components
+      run: |
+        make clean
+        make all
+        make examples
+    
+    - name: Run integration tests
+      run: |
+        export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+        python tests/integration/test_cross_language.py
+
+  test-memory:
+    name: Memory and Valgrind Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make valgrind
+    
+    - name: Build with debug symbols
+      run: |
+        make clean
+        make CFLAGS="-std=c99 -Wall -Wextra -g -DDEBUG" all
+        gcc -std=c99 -Wall -Wextra -g -I. -o tests/c/test_comprehensive tests/c/test_comprehensive.c -L. -ltupledns
+    
+    - name: Run memory leak detection
+      run: |
+        valgrind --leak-check=full --error-exitcode=1 ./test_tupledns
+        valgrind --leak-check=full --error-exitcode=1 ./tests/c/test_comprehensive
+    
+    - name: Run examples under valgrind
+      run: |
+        valgrind --leak-check=full --error-exitcode=1 ./examples/example_basic
+        valgrind --leak-check=full --error-exitcode=1 ./examples/example_spatial
+
+  benchmark:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make
+    
+    - name: Build optimized version
+      run: |
+        make clean
+        make CFLAGS="-std=c99 -Wall -Wextra -O3 -DNDEBUG -fPIC" all
+        gcc -std=c99 -Wall -Wextra -O3 -I. -o tests/c/test_comprehensive tests/c/test_comprehensive.c -L. -ltupledns
+    
+    - name: Run performance benchmarks
+      run: |
+        echo "=== C Library Benchmarks ==="
+        ./tests/c/test_comprehensive --performance
+    
+    - name: Set up Python for benchmarks
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Run Python benchmarks
+      run: |
+        export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+        echo "=== Python Bindings Benchmarks ==="
+        cd tests/python
+        pytest test_tupledns.py -v -m performance --tb=short
+    
+    - name: Use Node.js for benchmarks
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Run JavaScript benchmarks
+      run: |
+        echo "=== JavaScript Bindings Benchmarks ==="
+        cd tests/javascript
+        node test_tupledns.js
+
+  test-platforms:
+    name: Multi-Platform Tests
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        # windows-latest would require different build commands
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make
+    
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        xcode-select --install || true
+    
+    - name: Build library
+      run: |
+        make clean
+        make all
+    
+    - name: Run basic tests
+      run: |
+        make test
+        ./test_tupledns
+    
+    - name: Test examples
+      run: |
+        make examples
+        if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+          LD_LIBRARY_PATH=. ./examples/example_basic
+        else
+          DYLD_LIBRARY_PATH=. ./examples/example_basic
+        fi
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make cppcheck clang-tools
+    
+    - name: Run static analysis
+      run: |
+        cppcheck --enable=all --std=c99 --error-exitcode=1 tupledns.c tupledns.h
+    
+    - name: Run clang static analyzer
+      run: |
+        scan-build make clean
+        scan-build -o analysis-results make all
+    
+    - name: Check for common security issues
+      run: |
+        grep -n "strcpy\|strcat\|sprintf\|gets" *.c *.h || echo "No unsafe functions found"
+        grep -n "malloc\|free" *.c | wc -l | xargs echo "Dynamic allocation calls:"
+
+  documentation:
+    name: Documentation Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Check documentation links
+      run: |
+        # Check that all referenced files exist
+        if [ ! -f "docs/Getting-Started.md" ]; then echo "Missing Getting-Started.md"; exit 1; fi
+        if [ ! -f "docs/C-API.md" ]; then echo "Missing C-API.md"; exit 1; fi
+        if [ ! -f "docs/Python-API.md" ]; then echo "Missing Python-API.md"; exit 1; fi
+        if [ ! -f "docs/JavaScript-API.md" ]; then echo "Missing JavaScript-API.md"; exit 1; fi
+        if [ ! -f "docs/Protocol-Spec.md" ]; then echo "Missing Protocol-Spec.md"; exit 1; fi
+        echo "All documentation files exist"
+    
+    - name: Check example files
+      run: |
+        if [ ! -f "examples/example_basic.c" ]; then echo "Missing example_basic.c"; exit 1; fi
+        if [ ! -f "examples/example_spatial.c" ]; then echo "Missing example_spatial.c"; exit 1; fi
+        if [ ! -f "examples/example_music.c" ]; then echo "Missing example_music.c"; exit 1; fi
+        if [ ! -f "examples/demo.html" ]; then echo "Missing demo.html"; exit 1; fi
+        echo "All example files exist"
+    
+    - name: Validate README links
+      run: |
+        # Check that README doesn't contain broken internal links
+        python3 -c "
+import re
+with open('README.md', 'r') as f:
+    content = f.read()
+    
+# Find all markdown links
+links = re.findall(r'\[.*?\]\((.*?)\)', content)
+internal_links = [link for link in links if not link.startswith('http') and not link.startswith('#')]
+
+import os
+for link in internal_links:
+    if not os.path.exists(link):
+        print(f'Broken link: {link}')
+        exit(1)
+        
+print(f'Checked {len(internal_links)} internal links - all valid')
+"

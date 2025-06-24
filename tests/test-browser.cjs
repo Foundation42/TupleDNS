@@ -203,7 +203,7 @@ class TupleDNSBrowserTest {
         console.log('\n📄 Testing Demo Page...');
         
         try {
-            const htmlContent = fs.readFileSync('demo.html', 'utf8');
+            const htmlContent = fs.readFileSync('examples/demo.html', 'utf8');
             
             const hasFeatures = [
                 'TupleDNS Browser Demo',
@@ -218,7 +218,7 @@ class TupleDNSBrowserTest {
                 console.log('   - Registration form found');
                 console.log('   - Discovery interface found');
                 console.log('   - Example scenarios included');
-                console.log(`   📱 Open in browser: file://${process.cwd()}/demo.html`);
+                console.log(`   📱 Open in browser: file://${process.cwd()}/examples/demo.html`);
                 return true;
             } else {
                 console.log('❌ Demo page incomplete');
@@ -263,7 +263,7 @@ class TupleDNSBrowserTest {
                 console.log('🌐 TupleDNS browser integration is ready!');
                 console.log('\n🚀 Next Steps:');
                 console.log('   1. Start proxy: node proxy-server.cjs');
-                console.log(`   2. Open demo: file://${process.cwd()}/demo.html`);
+                console.log(`   2. Open demo: file://${process.cwd()}/examples/demo.html`);
                 console.log('   3. Test multidimensional discovery in browser!');
             } else {
                 console.log('\n⚠️ Some tests failed - check implementation');

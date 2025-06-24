@@ -356,9 +356,19 @@ This project emerged from Christian's vision of his studio as a "living organism
 
 ---
 
-## 🚀 Future Development Directions
+## 🚀 Immediate TODO (High Priority)
+
+### Documentation Cleanup (URGENT - People are watching!)
+- **Fix broken links in README.md** - References to non-existent docs
+- **File structure consistency** - Examples paths don't match actual locations
+- **Create missing documentation files** referenced in README
+- **Enhance test coverage** - More comprehensive test cases
+- **Project-wide consistency check** - Ensure everything aligns
+
+### Future Development Directions
 
 ### Immediate Opportunities (Version 1.1)
+- **Native Rust bindings** - FFI wrapper → native crate
 - **WebAssembly optimization** - Smaller binaries, faster loading
 - **Real DNS testing** - Deploy with actual DNS infrastructure  
 - **Mobile SDKs** - Native iOS/Android bindings
